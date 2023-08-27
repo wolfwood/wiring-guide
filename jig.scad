@@ -37,31 +37,31 @@ module wire_mount_rounded(wires=1,low,mid,high,left=true,right=true){
   let(x=wire_mount_width,y=wire_mount_length,z=floor+2.5*wire_width, wire_width=wires*wire_width) {
     translate([wire_width/2+x/2,0,0]) linear_extrude(is_undef(mid) && is_undef(high) ? max_z : z) hull() {
       translate([0,y/2-x/2,0]){
-	if(right){
-	  translate([x/4,0,0]) square([x/2,x],center=true);
-	}
-	circle($fn=60,d=x);
+        if(right){
+          translate([x/4,0,0]) square([x/2,x],center=true);
+        }
+        circle($fn=60,d=x);
       }
       translate([0,-(y/2-x/2),0]) {
-	if (right){
-	  translate([x/4,0,0]) square([x/2,x],center=true);
-	}
-	circle($fn=60,d=x);
+        if (right){
+          translate([x/4,0,0]) square([x/2,x],center=true);
+        }
+        circle($fn=60,d=x);
       }
     }
 
     translate([-(wire_width/2+x/2),0,0]) linear_extrude(z) hull() {
       translate([0,wire_mount_length/2-x/2,0]) {
-	if(left){
-	  translate([-x/4,0,0])square([x/2,x],center=true);
-	}
-	circle($fn=60,d=x);
+        if(left){
+          translate([-x/4,0,0])square([x/2,x],center=true);
+        }
+        circle($fn=60,d=x);
       }
       translate([0,-(wire_mount_length/2-x/2),0]) {
-	if (left){
-	  translate([-x/4,0,0]) square([x/2,x],center=true);
-	}
-	circle($fn=60,d=x);
+        if (left){
+          translate([-x/4,0,0]) square([x/2,x],center=true);
+        }
+        circle($fn=60,d=x);
       }
     }
 
@@ -78,13 +78,13 @@ let(gap=gap) {
 
   let(angle=60, ratio=tan(angle), distance=hs_length/2/ratio,
       circle_corner=[(wire_mount_width/2) - (cos(angle)*wire_mount_width/2),
-		     (wire_mount_width/2) - (sin(angle)*wire_mount_width/2)] ){
+                     (wire_mount_width/2) - (sin(angle)*wire_mount_width/2)] ){
     translate([0,-wire_width -distance -wire_mount_length -gap-hs_width/2-wire_mount_length/2,0]) wire_mount_rounded(2,mid=true);
 
     translate([0,-distance-wire_mount_length -gap-hs_width/2,0])
       linear_extrude(max_z) polygon([[0,0],
-				     [-circle_corner.x + (hs_length-wire_width)/2, distance+circle_corner.y],
-				     [ circle_corner.x - (hs_length-wire_width)/2, distance+circle_corner.y] ]);
+                                     [-circle_corner.x + (hs_length-wire_width)/2, distance+circle_corner.y],
+                                     [ circle_corner.x - (hs_length-wire_width)/2, distance+circle_corner.y] ]);
   }
 }
 
