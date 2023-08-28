@@ -69,23 +69,28 @@ module wire_mount_rounded(wires=1,low,mid,high,left=true,right=true){
   }
 }
 
-hotswap_mount();
-
-let(gap=gap) {
-  translate([-hs_length/2,-gap-hs_width/2-wire_mount_length/2,0]) wire_mount_rounded(right=true);
-  translate([hs_length/2,-gap-hs_width/2-wire_mount_length/2,0]) wire_mount_rounded(high=true, left=true);
-
-
-  let(angle=60, ratio=tan(angle), distance=hs_length/2/ratio,
+module hotswap_jig(){
+  let(angle=60,
+      ratio=tan(angle), distance=hs_length/2/ratio,
       circle_corner=[(wire_mount_width/2) - (cos(angle)*wire_mount_width/2),
-                     (wire_mount_width/2) - (sin(angle)*wire_mount_width/2)] ){
-    translate([0,-wire_width -distance -wire_mount_length -gap-hs_width/2-wire_mount_length/2,0]) wire_mount_rounded(2,mid=true);
+		     (wire_mount_width/2) - (sin(angle)*wire_mount_width/2)],
+      bottom=-wire_width -distance -wire_mount_length -gap-hs_width/2-wire_mount_length/2
+      ) {
+    translate([0,wire_mount_length/2-bottom,0]){
+      hotswap_mount();
 
-    translate([0,-distance-wire_mount_length -gap-hs_width/2,0])
-      linear_extrude(max_z) polygon([[0,0],
-                                     [-circle_corner.x + (hs_length-wire_width)/2, distance+circle_corner.y],
-                                     [ circle_corner.x - (hs_length-wire_width)/2, distance+circle_corner.y] ]);
+      translate([-hs_length/2,-gap-hs_width/2-wire_mount_length/2,0]) wire_mount_rounded(right=true);
+      translate([hs_length/2,-gap-hs_width/2-wire_mount_length/2,0]) wire_mount_rounded(high=true, left=true);
+
+      translate([0,bottom,0]) wire_mount_rounded(2,mid=true);
+
+      translate([0,-distance-wire_mount_length -gap-hs_width/2,0])
+	linear_extrude(max_z) polygon([[0,0],
+				       [-circle_corner.x + (hs_length-wire_width)/2, distance+circle_corner.y],
+				       [ circle_corner.x - (hs_length-wire_width)/2, distance+circle_corner.y] ]);
+    }
   }
 }
 
-let(x=18,y=16,z=2) translate([-x/2,-y/2-2.5,-z]) cube([x,y,z]);
+hotswap_jig();
+let(x=18,y=16,z=2) translate([-x/2,-1.5,-z]) cube([x,y,z]);
