@@ -69,6 +69,22 @@ module wire_mount_rounded(wires=1,low,mid,high,left=true,right=true){
   }
 }
 
+module ribbon_divider(angle=60,length=3,wires=4){
+  ratio=tan(angle);
+  distance=length/2/ratio;
+
+  translate([sqrt(wires) == floor(sqrt(wires)) ? 0 :
+	     (wires/2 - floor(sqrt(wires))^2) * wire_width * (is_undef($mirror) || !$mirror ? 1 : -1),
+	     -wire_mount_length/2/*-wire_width/2*/,0]) wire_mount_rounded(wires,mid=true);
+
+  translate([0,wire_width*(floor(sqrt(wires))^2)/2,0])
+    linear_extrude(wire_height(mid=true)+wire_width*2.5)
+    polygon([[0,0],
+	     [ length/2, distance],
+	     [-length/2, distance] ]);
+
+}
+
 module hotswap_jig(){
   let(angle=60,
       ratio=tan(angle), distance=hs_length/2/ratio,
@@ -92,5 +108,26 @@ module hotswap_jig(){
   }
 }
 
-hotswap_jig();
-let(x=18,y=16,z=2) translate([-x/2,-1.5,-z]) cube([x,y,z]);
+module bifurcate(angle=30, little_spacing=4, big_spacing=14, wires=2^2) {
+  assert(0 < $children && $children < 3);
+
+  rotate([0,0, angle]) translate([0,(is_undef($mirror) || !$mirror ? big_spacing : 0) + little_spacing,0])
+    children(is_undef($mirror) ? 0 : $children -1);
+  rotate([0,0,-angle]) translate([0,(is_undef($mirror) || !$mirror ? 0 : big_spacing) + little_spacing,0])
+    children(is_undef($mirror) ? $children -1 : 0);
+
+  ribbon_divider(angle,2.8216, wires);
+}
+
+module plate(z=1.4, r=2) {
+  children();
+
+  translate([0,0,-z]) linear_extrude(z) offset(/*$fn=30,*/r=r/*,delta=1.5,chamfer=true*/) hull() projection() children();
+}
+
+$mirror=true;
+plate() bifurcate(wires=6) {
+  translate([-wire_width,0,0])
+    bifurcate() hotswap_jig();
+  hotswap_jig();
+}
