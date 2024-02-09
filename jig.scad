@@ -59,7 +59,7 @@ module wire_mount_rounded(wires=1,low,mid,high,left=true,right=true,clasp=false)
 	}
       }
 
-      if(clasp && $mirror)
+      if(clasp && (!is_undef($mirror) && $mirror))
 	translate([0,y/2, max(z,mid_z)-2]) rotate([90,0,0]) linear_extrude(y) polygon([[0,0],[0,2],[-2,2]]);
     }
 
@@ -165,10 +165,28 @@ module plate(z=1.4, r=2) {
   translate([0,0,-z]) linear_extrude(z) offset(/*$fn=30,*/r=r/*,delta=1.5,chamfer=true*/) hull() projection() children();
 }
 
-$mirror=true;
-plate() bifurcate(wires=6) {
-  bifurcate() hotswap_jig();
-  hotswap_jig();
+$mirror=false;
+
+magnet = [(is_undef($mirror) || !$mirror ? -1 : 1) * 16,22,0];
+mag_depth=.8;
+mag_dia=12;
+mag_h=3;
+
+difference() {
+plate(){
+  bifurcate(wires=6) {
+    bifurcate() hotswap_jig();
+    hotswap_jig();
+  }
+
+  if($preview){
+    color("grey") translate(magnet-[0,0,mag_depth]) cylinder(d=mag_dia,h=mag_h);
+  }
+  translate(magnet) cylinder(d=mag_dia+2,h=1);
+}
+
+ translate(magnet+[0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.2,h=mag_h);
+  translate(magnet) cylinder(d=5,h=20,center=true);
 }
 
 mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
