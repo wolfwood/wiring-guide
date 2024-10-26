@@ -180,7 +180,7 @@ module magnet_jig(sockets=3,
       translate(magnet) cylinder(d=mag_dia+2,h=1);
     }
 
-    translate(magnet+[0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.2,h=mag_h);
+    translate(magnet+[0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.1,h=mag_h);
     translate(magnet) cylinder(d=5,h=20,center=true);
   }
 
