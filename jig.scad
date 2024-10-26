@@ -93,8 +93,7 @@ module ribbon_divider(angle=2*angle,length=3,wires=4){
 
   reflect = (is_undef($mirror) || !$mirror) ? 1 : -1;
 
-  translate([sqrt(wires) == floor(sqrt(wires)) ? 0 :
-	     (wires/2 - floor(sqrt(wires))^2) * wire_width * reflect,
+  translate([ (2-wires/2) * wire_width * reflect,
 	     -wire_mount_length/2,0]) wire_mount_rounded(wires,mid=true, clasp=true);
 
   linear_extrude(wire_height(mid=true)+wire_width*2.5)
