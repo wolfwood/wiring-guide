@@ -185,7 +185,7 @@ module magnet_jig(sockets=3,
   }
 
   if($preview){
-    color("grey") translate(magnet-[0,0,mag_depth]) cylinder(d=mag_dia,h=mag_h);
+    color("silver") translate(magnet-[0,0,mag_depth]) cylinder(d=mag_dia,h=mag_h);
   }
 
   jig_wires(sockets = sockets);
@@ -233,7 +233,7 @@ module recursive_wires(sockets = 3) {
 }
 
 module wire(l=14+wire_mount_length, back=false){
-  color("grey",.2)
+  color("grey",.4)
   translate([wire_width/2,0,wire_width/2+wire_height(mid=1)])
     rotate([90*(back?1:-1),0,0])
     cylinder($fn=30, d=wire_width, h=l);
