@@ -167,27 +167,41 @@ module plate(z=1.4, r=2) {
 
 $mirror=false;
 
-magnet = [(is_undef($mirror) || !$mirror ? -1 : 1) * 16,22,0];
-mag_depth=.8;
-mag_dia=12;
-mag_h=3;
+module magnet_jig(sockets=3,
+                  magnet = [(is_undef($mirror) || !$mirror ? -1 : 1) * 16,22,0],
+                  mag_depth=.8,
+                  mag_dia=12,
+                  mag_h=3){
+  assert(is_num(sockets) && sockets >= 2);
 
-difference() {
-plate(){
-  bifurcate(wires=6) {
-    bifurcate() hotswap_jig();
-    hotswap_jig();
+  difference() {
+    plate() {
+      recursive_jig(sockets = sockets);
+
+      translate(magnet) cylinder(d=mag_dia+2,h=1);
+    }
+
+    translate(magnet+[0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.2,h=mag_h);
+    translate(magnet) cylinder(d=5,h=20,center=true);
   }
 
   if($preview){
     color("grey") translate(magnet-[0,0,mag_depth]) cylinder(d=mag_dia,h=mag_h);
   }
-  translate(magnet) cylinder(d=mag_dia+2,h=1);
 }
 
- translate(magnet+[0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.2,h=mag_h);
-  translate(magnet) cylinder(d=5,h=20,center=true);
+module recursive_jig(sockets) {
+  if (sockets == 2) {
+    bifurcate() hotswap_jig();
+  } else {
+    bifurcate(wires=sockets*2) {
+      recursive_jig(sockets = sockets - 1);
+      hotswap_jig();
+    }
+  }
 }
+
+magnet_jig();
 
 mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
   translate([-4*wire_width,0,0])
