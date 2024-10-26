@@ -188,6 +188,8 @@ module magnet_jig(sockets=3,
   if($preview){
     color("grey") translate(magnet-[0,0,mag_depth]) cylinder(d=mag_dia,h=mag_h);
   }
+
+  jig_wires(sockets = sockets);
 }
 
 module recursive_jig(sockets) {
@@ -203,33 +205,33 @@ module recursive_jig(sockets) {
 
 magnet_jig();
 
-mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
-  translate([-4*wire_width,0,0])
-    wires(6,back=true);
 
+module jig_wires(sockets=3) {
+  mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
+    recursive_wires(sockets = sockets);
+
+    translate([-(sockets -1) *2*wire_width,0,0])
+      wires(sockets*2,back=true);
+  }
+}
+
+module recursive_wires(sockets = 3) {
+  assert(sockets >= 1);
   l_jig = little_spacing + wire_mount_length + 1;
 
   wires(2,l=l_jig,a=angle);
 
-  l_trunk1 = big_spacing;
-  wires(4,l=l_trunk1,a=-angle);
+  if (sockets == 2) {
+    wires(2,l=big_spacing+l_jig,a=-angle);
+  } else {
+    wires((sockets-1)*2,l=big_spacing,a=-angle);
 
-  translate([-4*wire_width,0,0])
+    translate([-2*(sockets-1)*wire_width,0,0])
     rotate([0,0,angle])
-    translate([2*wire_width,l_trunk1,0])
-    wires(2,l=l_jig,a=angle);
-
-  l_trunk2 = big_spacing+l_jig;
-  translate([-4*wire_width,0,0])
-    rotate([0,0,angle])
-    translate([2*wire_width,l_trunk1,0])
-    wires(2,l=l_trunk2,a=-angle);
-
-  echo(str(" Row 1: ", l_jig, "mm", ", effective: 0 mm"));
-  echo(str(" Row 2: ", l_trunk1+l_jig, "mm, effective: ", l_trunk1, "mm"));
-  echo(str(" Row 3: ", l_trunk1+l_trunk2, "mm, effective: ",  l_trunk2-l_jig,"mm"));
+      translate([2*(sockets-2)*wire_width,big_spacing,0])
+      recursive_wires(sockets-1);
+  }
 }
-
 
 module wire(l=14+wire_mount_length, back=false){
   color("grey",.2)
