@@ -139,7 +139,7 @@ module hotswap_jig(){
   }
 }
 
-module bifurcate(angle=angle, wires=2^2) {
+module bifurcate(angle=angle, wires=2^2, divider=true) {
   assert(0 < $children && $children < 3);
 
   reflect = is_undef($mirror) || !$mirror;
@@ -170,7 +170,8 @@ module bifurcate(angle=angle, wires=2^2) {
       children(reflect ? $children -1 : 0);
   }
 
-  ribbon_divider(angle,2.8216, wires);
+  if (divider)
+    ribbon_divider(angle,2.8216, wires);
 }
 
 module plate(z=1.4, r=2) {
@@ -182,7 +183,8 @@ module plate(z=1.4, r=2) {
 $mirror=false;
 
 module magnet_jig(sockets=3,
-                  magnet = [(is_undef($mirror) || !$mirror ? -1 : 1) * 16,22,0],
+                  // position relative to a 2 socket jig
+                  magnet = [(is_undef($mirror) || !$mirror ? -1 : 1) * 7.5,8.3,0],
                   mag_depth=.8,
                   mag_dia=12,
                   mag_h=3){
@@ -192,15 +194,18 @@ module magnet_jig(sockets=3,
     plate() {
       recursive_jig(sockets = sockets);
 
-      translate(magnet) cylinder(d=mag_dia+2,h=1);
+      recursive_magnet(sockets=sockets,
+                       magnet=magnet, mag_depth=mag_depth, mag_dia=mag_dia, mag_h=mag_h);
     }
 
-    translate(magnet+[0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.1,h=mag_h);
-    translate(magnet) cylinder(d=5,h=20,center=true);
+    recursive_magnet(sockets=sockets, punch=true,
+                     magnet=magnet, mag_depth=mag_depth, mag_dia=mag_dia, mag_h=mag_h);
   }
 
   if($preview){
-    color("silver") translate(magnet-[0,0,mag_depth]) cylinder(d=mag_dia,h=mag_h);
+    color("silver")
+      recursive_magnet(sockets=sockets, preview=true,
+                       magnet=magnet, mag_depth=mag_depth, mag_dia=mag_dia, mag_h=mag_h);
   }
 
   jig_wires(sockets = sockets);
@@ -220,8 +225,35 @@ module recursive_jig(sockets) {
   }
 }
 
-magnet_jig();
+module recursive_magnet(sockets, punch=false, preview=false,
+                  magnet,
+                  mag_depth,
+                  mag_dia,
+                  mag_h) {
+  if (sockets == 2) {
+    translate(magnet) {
+      if (preview) {
+        translate([0,0,-mag_depth]) cylinder(d=mag_dia,h=mag_h);
+      } else {
+        if (!punch) {
+          cylinder(d=mag_dia+2,h=1);
+        } else {
+          translate([0,0,-mag_depth]) cylinder($fn=60,d=mag_dia+.1,h=mag_h);
+          cylinder(d=5,h=20,center=true);
+        }
+      }
+    }
+  } else {
+    bifurcate(wires=sockets*2, divider=false) {
+      recursive_magnet(sockets = sockets - 1, punch=punch, preview=preview,
+                       magnet=magnet, mag_depth=mag_depth, mag_dia=mag_dia, mag_h=mag_h);
+      // empty placeholder, so bifurcate doesn't clone the magnet
+      cube([0,0,0]);
+    }
+  }
+}
 
+magnet_jig();
 
 module jig_wires(sockets=3) {
   mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
