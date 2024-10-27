@@ -60,7 +60,7 @@ module wire_mount_rounded(wires=1,low,mid,high,left=true,right=true,clasp=false)
 	}
       }
 
-      if(clasp && (!is_undef($mirror) && $mirror))
+      if(clasp)
 	translate([0,y/2, max(z,mid_z)-2]) rotate([90,0,0]) linear_extrude(y) polygon([[0,0],[0,2],[-2,2]]);
     }
 
@@ -80,7 +80,7 @@ module wire_mount_rounded(wires=1,low,mid,high,left=true,right=true,clasp=false)
 	}
       }
 
-      if(clasp && (is_undef($mirror) || !$mirror))
+      if(clasp)
 	translate([0,y/2, max(z,mid_z)-2]) rotate([90,0,0]) linear_extrude(y) polygon([[0,0],[0,2],[2,2]]);
     }
 
