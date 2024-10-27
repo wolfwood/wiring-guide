@@ -17,6 +17,7 @@ angle=15;
 little_spacing=3.3;
 big_spacing=16;
 
+sockets=4;
 
 function wire_height(low,mid,high) =
   (is_undef(low) && is_undef(mid) && is_undef(high)) ||
@@ -180,8 +181,6 @@ module plate(z=1.4, r=2) {
   translate([0,0,-z]) linear_extrude(z) offset(/*$fn=30,*/r=r/*,delta=1.5,chamfer=true*/) hull() projection() children();
 }
 
-$mirror=false;
-
 module magnet_jig(sockets=3,
                   // position relative to a 2 socket jig
                   magnet = [(is_undef($mirror) || !$mirror ? -1 : 1) * 7.5,8.3,0],
@@ -253,7 +252,7 @@ module recursive_magnet(sockets, punch=false, preview=false,
   }
 }
 
-magnet_jig();
+magnet_jig(sockets);
 
 module jig_wires(sockets=3) {
   mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
