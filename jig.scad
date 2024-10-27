@@ -147,13 +147,28 @@ module bifurcate(angle=angle, wires=2^2) {
   left_wires = reflect ? wires-2 : 2;
   right_wires = reflect ? 2 : wires-2;
 
-  translate([-(left_wires)*wire_width,0,0])
-    rotate([0,0, angle])
-    translate([(left_wires)/2*wire_width, reflect ? big_spacing + ($children == 1 ? little_spacing : 0) : little_spacing, 0])
-    children(reflect ? 0 : $children -1);
+  // assume a single child is centered, rather than pre-positioned
+  if ($children == 1) {
+    translate([-left_wires * wire_width,0,0])
+      rotate([0,0, angle])
+      translate([left_wires/2 * wire_width, (reflect ? big_spacing : 0) + little_spacing, 0])
+      children();
 
-  translate([right_wires * wire_width,0,0]) rotate([0,0,-angle]) translate([right_wires/2 * -wire_width, reflect ? little_spacing  : big_spacing + ($children==1 ? little_spacing : 0), 0])
-    children(reflect ? $children -1 : 0);
+    translate([right_wires * wire_width,0,0])
+      rotate([0,0, -angle])
+      translate([-right_wires/2 * wire_width, (!reflect ? big_spacing : 0) + little_spacing, 0])
+      children();
+  } else {
+    translate([-left_wires * wire_width,0,0])
+      rotate([0,0, angle])
+      translate([(left_wires - 2) * wire_width, reflect ? big_spacing : little_spacing, 0])
+      children(reflect ? 0 : $children -1);
+
+    translate([right_wires * wire_width,0,0])
+      rotate([0,0,-angle])
+      translate([(right_wires - 2) * -wire_width, reflect ? little_spacing  : big_spacing, 0])
+      children(reflect ? $children -1 : 0);
+  }
 
   ribbon_divider(angle,2.8216, wires);
 }
@@ -192,12 +207,15 @@ module magnet_jig(sockets=3,
 }
 
 module recursive_jig(sockets) {
+  chirality = is_undef($mirror) || !$mirror ? -1 : 1;
+
   if (sockets == 2) {
     bifurcate() hotswap_jig();
   } else {
     bifurcate(wires=sockets*2) {
       recursive_jig(sockets = sockets - 1);
-      hotswap_jig();
+      //align left or right
+      translate([chirality * wire_width,0,0]) hotswap_jig();
     }
   }
 }
