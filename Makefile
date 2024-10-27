@@ -1,10 +1,15 @@
 OPENSCAD=openscad
-SCADFLAGS=-q --hardwarnings
+SCADFLAGS = -q --hardwarnings
 
-SCADVER := $(shell $(OPENSCAD) --version 2>&1 | cut -f 3 -d ' ' -s)
+MANIFOLD_FEATURE := $(shell $(OPENSCAD) --version --enable manifold > /dev/null 2>&1; echo $$?)
+MANIFOLD_BACKEND := $(shell $(OPENSCAD) --version --backend manifold > /dev/null 2>&1; echo $$?)
 
-ifneq ($(SCADVER), 2021.01)
+ifeq ($(MANIFOLD_BACKEND), 0)
 	SCADFLAGS += --backend manifold
+else
+ifeq ($(MANIFOLD_FEATURE), 0)
+	SCADFLAGS += --enable manifold
+endif
 endif
 
 
