@@ -19,6 +19,9 @@ big_spacing=16;
 
 sockets=4;
 
+if (is_undef($empty))
+  magnet_jig(sockets);
+
 function wire_height(low,mid,high) =
   (is_undef(low) && is_undef(mid) && is_undef(high)) ||
   !is_undef(low)  ? hs_height/2 - hs_offset/2 - wire_width/2 :
@@ -251,8 +254,6 @@ module recursive_magnet(sockets, punch=false, preview=false,
     }
   }
 }
-
-magnet_jig(sockets);
 
 module jig_wires(sockets=3) {
   mirror([(is_undef($mirror) || !$mirror) ? 0 : 1, 0,0]) if($preview){
