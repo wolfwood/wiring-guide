@@ -14,10 +14,15 @@ endif
 
 
 SOCKETS=2 3 4
-TARGET_prefixes=$(addprefix things/jig-,$(SOCKETS))
-TARGETS=$(addsuffix -left.stl,$(TARGET_prefixes)) $(addsuffix -right.stl,$(TARGET_prefixes))
+RULERS=$(addsuffix .stl,$(addprefix things/ruler-,$(SOCKETS)))
+JIG_prefixes=$(addprefix things/jig-,$(SOCKETS))
+TARGETS=$(addsuffix -left.stl,$(JIG_prefixes)) $(addsuffix -right.stl,$(JIG_prefixes)) $(RULERS)
+
 
 all: things/ $(TARGETS)
+
+-include .*.depends
+
 
 things/jig-%-left.stl: jig.scad
 	$(OPENSCAD) $(SCADFLAGS) --render -Dsockets=$* -o $@ $<
@@ -25,8 +30,12 @@ things/jig-%-left.stl: jig.scad
 things/jig-%-right.stl: jig.scad
 	$(OPENSCAD) $(SCADFLAGS) --render -Dsockets=$* '-D$$mirror=true' -o $@ $<
 
+things/ruler-%.stl: ruler.scad
+	$(OPENSCAD) $(SCADFLAGS) -d .ruler.depends --render -Dsockets=$* -o $@ $<
+
+
 things/:
 	mkdir things
 
 clean:
-	-rm $(TARGETS)
+	-rm $(TARGETS) .ruler.depends
